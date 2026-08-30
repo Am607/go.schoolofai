@@ -45,7 +45,8 @@ svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-linecap:ro
 .hero h1 em, .section-heading h2 em, .resources-top h2 em { font-family:Georgia, serif; font-weight:400; color:var(--violet); }
 .hero-copy>p { color:var(--muted); font-size:17px; line-height:1.7; max-width:530px; }
 .hero-actions { margin-top:32px; display:flex; align-items:center; gap:30px; }
-.text-link { font-size:13px; font-weight:700; border-bottom:1px solid var(--ink); padding:11px 0 8px; }
+.text-link { appearance:none; background:transparent; color:inherit; font-size:13px; font-weight:700; border:0; border-bottom:1px solid var(--ink); padding:11px 0 8px; cursor:pointer; white-space:nowrap; }
+.text-link:hover,.text-link:focus-visible{color:#b32929;border-bottom-color:#b32929}.text-link:focus-visible{outline:2px solid rgba(179,41,41,.22);outline-offset:4px}.text-link:disabled{color:var(--muted);border-bottom-color:var(--line);cursor:wait}
 .social-proof { margin-top:55px; display:flex; align-items:center; gap:16px; }
 .avatars { display:flex; }
 .avatars span { margin-left:-7px; width:34px; height:34px; border:2px solid var(--paper); border-radius:50%; display:grid; place-items:center; background:#deb67d; font-size:9px; font-weight:800; }

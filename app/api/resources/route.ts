@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     const baseSlug = title.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 72) || "resource";
     const { data: slugMatch } = await supabase.from("resources").select("id").eq("slug", baseSlug).maybeSingle();
     const slug = slugMatch ? `${baseSlug}-${crypto.randomUUID().slice(0, 6)}` : baseSlug;
-    const referralCode = await generateReferralCode();
+    const referralCode = await generateReferralCode(title);
     let pdfUrl: string | null = null;
     if (hasPdf) {
       if (!(file instanceof File) || file.type !== "application/pdf" || file.size > 10 * 1024 * 1024) {

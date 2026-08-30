@@ -1,24 +1,35 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { Resource } from "../data";
 import { Icon } from "../icons";
-import { createClient } from "../../lib/supabase/client";
 
 const PUBLIC_SITE_URL = "https://go.schoolofai.so";
 
 export default function AdminDashboard({ resources: initialResources, adminEmail }: { resources: Resource[]; adminEmail: string }) {
-  const router = useRouter();
   const [resources, setResources] = useState(initialResources);
   const [submitState, setSubmitState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
   const [editState, setEditState] = useState<"idle" | "loading" | "error">("idle");
+  const [signOutState, setSignOutState] = useState<"idle" | "loading" | "error">("idle");
 
-  async function signOut() { const supabase = createClient(); await supabase.auth.signOut(); router.push("/admin/login"); router.refresh(); }
+  async function signOut() {
+    if (!window.confirm("Are you sure you want to sign out?")) return;
+    setSignOutState("loading");
+    try {
+      const response = await fetch("/api/auth/signout", { method: "POST" });
+      if (!response.ok) {
+        setSignOutState("error");
+        return;
+      }
+      window.location.replace("/admin/login");
+    } catch {
+      setSignOutState("error");
+    }
+  }
   async function submitResource(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formElement = event.currentTarget;
@@ -61,7 +72,7 @@ export default function AdminDashboard({ resources: initialResources, adminEmail
   }
 
   return <div className="admin-page shell"><div className="admin-dash">
-    <div className="admin-dash-head"><div><span className="section-kicker">RESOURCE MANAGER</span><h1>Manage creator resources</h1><p>Each resource creates one page containing everything you attach.</p><p>Signed in as {adminEmail}</p></div><button className="text-link" onClick={signOut} type="button">Sign out</button></div>
+    <div className="admin-dash-head"><div><span className="section-kicker">RESOURCE MANAGER</span><h1>Manage creator resources</h1><p>Each resource creates one page containing everything you attach.</p><p>Signed in as {adminEmail}</p>{signOutState === "error" && <p className="form-error">Couldn&apos;t sign out. Please try again.</p>}</div><button className="text-link" onClick={signOut} type="button" disabled={signOutState === "loading"}>{signOutState === "loading" ? "Signing out…" : "Sign out"}</button></div>
     <div className="admin-dash-grid">
       <form className="admin-dash-form" onSubmit={submitResource}>
         <h2>Create one resource page</h2>
