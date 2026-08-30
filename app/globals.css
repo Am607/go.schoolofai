@@ -203,9 +203,11 @@ svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-linecap:ro
 .admin-dash-list{display:flex;flex-direction:column;gap:10px}
 .admin-empty{color:var(--muted);font-size:13px;padding:20px;text-align:center;border:1px dashed var(--line);border-radius:12px}
 .admin-dash-item{display:flex;align-items:start;justify-content:space-between;gap:14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.admin-item-content{min-width:0;flex:1}
 .admin-dash-item strong{font-size:13px}
 .admin-dash-item p{color:var(--muted);font-size:12px;margin:4px 0 0}
 .admin-view-link{display:inline-block;margin-top:8px;color:var(--violet);font-size:10px;font-weight:800}
+.admin-share-row{display:flex;align-items:center;gap:8px;min-width:0;margin-top:8px}.admin-share-row .admin-view-link{min-width:0;margin-top:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.copy-link-button{display:inline-flex;align-items:center;gap:4px;flex-shrink:0;border:0;background:transparent;color:var(--violet);font-size:9px;font-weight:800;cursor:pointer;padding:3px}.copy-link-button svg{width:12px;height:12px}
 .icon-button{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:#fff;display:grid;place-items:center;flex-shrink:0;cursor:pointer;color:var(--muted)}
 .icon-button:hover{background:#fdecec;border-color:#f3b9b9;color:#b32929}
 .icon-button svg{width:13px;height:13px}

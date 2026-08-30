@@ -1,4 +1,5 @@
 import { createClient, isSupabaseConfigured } from "../../../lib/supabase/server";
+import { generateReferralCode } from "../../../lib/referrals";
 
 const jsonHeaders = { "Content-Type": "application/json" };
 
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
     const baseSlug = title.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 72) || "resource";
     const { data: slugMatch } = await supabase.from("resources").select("id").eq("slug", baseSlug).maybeSingle();
     const slug = slugMatch ? `${baseSlug}-${crypto.randomUUID().slice(0, 6)}` : baseSlug;
+    const referralCode = await generateReferralCode();
     let pdfUrl: string | null = null;
     if (hasPdf) {
       if (!(file instanceof File) || file.type !== "application/pdf" || file.size > 10 * 1024 * 1024) {
@@ -45,14 +47,16 @@ export async function POST(request: Request) {
 
     const { data: inserted, error } = await supabase
       .from("resources")
-      .insert({ slug, title, description, type: "bundle", content: content || null, pdf_url: pdfUrl, article_url: url || null, file_url: null, is_published: true })
+      .insert({ slug, title, description, type: "bundle", content: content || null, pdf_url: pdfUrl, article_url: url || null, file_url: null, referral_code: referralCode, is_published: true })
       .select()
       .single();
     if (error) throw error;
 
-    return new Response(JSON.stringify({ resource: inserted }), { status: 201, headers: jsonHeaders });
-  } catch (error) {
-    console.error(error);
+    const shareUrl = new URL(`/res/${encodeURIComponent(slug)}`, request.url);
+    shareUrl.searchParams.set("ref", referralCode);
+    return new Response(JSON.stringify({ resource: inserted, shareUrl: shareUrl.toString() }), { status: 201, headers: jsonHeaders });
+  } catch {
+    console.error("Resource publication failed");
     return new Response(JSON.stringify({ error: "Unable to publish resource" }), { status: 500, headers: jsonHeaders });
   }
 }

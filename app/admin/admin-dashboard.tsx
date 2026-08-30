@@ -12,6 +12,7 @@ export default function AdminDashboard({ resources: initialResources, adminEmail
   const [resources, setResources] = useState(initialResources);
   const [submitState, setSubmitState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   async function signOut() { const supabase = createClient(); await supabase.auth.signOut(); router.push("/admin/login"); router.refresh(); }
   async function submitResource(event: React.FormEvent<HTMLFormElement>) {
@@ -30,6 +31,18 @@ export default function AdminDashboard({ resources: initialResources, adminEmail
     }
   }
   async function deleteResource(id: string) { setDeletingId(id); const response = await fetch(`/api/resources?id=${id}`, { method: "DELETE" }); if (response.ok) setResources(prev => prev.filter(r => r.id !== id)); setDeletingId(null); }
+  async function copyShareLink(resource: Resource) {
+    if (!resource.referral_code) return;
+    const shareUrl = new URL(`/res/${resource.slug}`, window.location.origin);
+    shareUrl.searchParams.set("ref", resource.referral_code);
+    try {
+      await navigator.clipboard.writeText(shareUrl.toString());
+      setCopiedId(resource.id);
+      window.setTimeout(() => setCopiedId(current => current === resource.id ? null : current), 2000);
+    } catch {
+      setCopiedId(null);
+    }
+  }
 
   return <div className="admin-page shell"><div className="admin-dash">
     <div className="admin-dash-head"><div><span className="section-kicker">RESOURCE MANAGER</span><h1>Manage creator resources</h1><p>Each resource creates one page containing everything you attach.</p><p>Signed in as {adminEmail}</p></div><button className="text-link" onClick={signOut} type="button">Sign out</button></div>
@@ -43,9 +56,13 @@ export default function AdminDashboard({ resources: initialResources, adminEmail
         <div className="form-section"><div><span>03</span><strong>link</strong><small>Optional</small></div><label>Destination URL<input name="url" type="url" placeholder="https://..." /></label></div>
         <p className="form-hint">Add at least one item. Everything is saved under the same ID and route.</p>
         <button className="button button-accent submit-button" disabled={submitState === "loading"}>{submitState === "loading" ? "Publishing…" : submitState === "success" ? "Published" : "Create resource page"}</button>
-        {submitState === "error" && <p className="form-error">Couldn&apos;t publish. Add at least one prompt, PDF, or link.</p>}
+        {submitState === "error" && <p className="form-error">Couldn&apos;t publish the resource. Please try again.</p>}
       </form>
-      <div className="admin-dash-list"><div className="admin-list-heading"><strong>Published pages</strong><span>{resources.length}</span></div>{resources.length === 0 && <p className="admin-empty">No resource pages published yet.</p>}{resources.map(resource => <div className="admin-dash-item" key={resource.id}><div><strong>{resource.title}</strong><p>{resource.description}</p><div className="admin-item-types">{resource.content && <span>Prompt</span>}{(resource.pdf_url || resource.type === "pdf") && <span>PDF</span>}{(resource.article_url || resource.type === "article") && <span>Link</span>}</div><Link className="admin-view-link" href={`/res/${resource.slug}`} target="_blank">View page ↗</Link></div><button type="button" className="icon-button" onClick={() => deleteResource(resource.id)} disabled={deletingId === resource.id} aria-label={`Delete ${resource.title}`}><Icon name="close" /></button></div>)}</div>
+      <div className="admin-dash-list"><div className="admin-list-heading"><strong>Published pages</strong><span>{resources.length}</span></div>{resources.length === 0 && <p className="admin-empty">No resource pages published yet.</p>}{resources.map(resource => {
+        const resourcePath = `/res/${resource.slug}`;
+        const sharePath = resource.referral_code ? `${resourcePath}?ref=${encodeURIComponent(resource.referral_code)}` : resourcePath;
+        return <div className="admin-dash-item" key={resource.id}><div className="admin-item-content"><strong>{resource.title}</strong><p>{resource.description}</p><div className="admin-item-types">{resource.content && <span>Prompt</span>}{(resource.pdf_url || resource.type === "pdf") && <span>PDF</span>}{(resource.article_url || resource.type === "article") && <span>Link</span>}</div><div className="admin-share-row"><Link className="admin-view-link" href={sharePath} target="_blank">{sharePath}</Link>{resource.referral_code && <button className="copy-link-button" type="button" onClick={() => copyShareLink(resource)}><Icon name={copiedId === resource.id ? "check" : "copy"} />{copiedId === resource.id ? "Copied" : "Copy"}</button>}</div></div><button type="button" className="icon-button" onClick={() => deleteResource(resource.id)} disabled={deletingId === resource.id} aria-label={`Delete ${resource.title}`}><Icon name="close" /></button></div>;
+      })}</div>
     </div>
   </div></div>;
 }

@@ -1,5 +1,5 @@
 export type Course = { id: string; slug: string; title: string; description: string; thumbnailUrl: string; modulesCount: number; lessonsCount: number; isUpcoming: boolean; ratingAvg: number | null; ratingCount: number };
-export type Resource = { id: string; slug: string; course_id?: string; title: string; description: string; type: "prompt" | "pdf" | "article" | "bundle"; content?: string; file_url?: string; pdf_url?: string; article_url?: string; is_featured?: boolean };
+export type Resource = { id: string; slug: string; course_id?: string; title: string; description: string; type: "prompt" | "pdf" | "article" | "bundle"; content?: string; file_url?: string; pdf_url?: string; article_url?: string; referral_code?: string; is_featured?: boolean };
 
 const fallbackCourses: Course[] = [
   { id: "ai-content", slug: "ai-content-mastery", title: "AI Content Mastery", description: "Build a repeatable content system with AI — from idea to published post, without losing your voice.", thumbnailUrl: "", modulesCount: 6, lessonsCount: 18, isUpcoming: false, ratingAvg: 4.8, ratingCount: 32 },
