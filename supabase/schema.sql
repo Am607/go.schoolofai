@@ -12,6 +12,7 @@ create table if not exists public.resources (
   file_url text,
   pdf_url text,
   article_url text,
+  referral_code text unique,
   is_featured boolean not null default false,
   is_published boolean not null default true,
   created_at timestamptz not null default now(),
@@ -21,6 +22,9 @@ create table if not exists public.resources (
     (type = 'bundle' and (content is not null or pdf_url is not null or article_url is not null))
   )
 );
+
+alter table public.resources
+add column if not exists referral_code text unique;
 
 alter table public.resources enable row level security;
 drop policy if exists "Public can read published resources" on public.resources;

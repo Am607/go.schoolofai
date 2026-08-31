@@ -1,4 +1,5 @@
 import { createClient, isSupabaseConfigured } from "../../../lib/supabase/server";
+import { generateReferralCode } from "../../../lib/referrals";
 
 const jsonHeaders = { "Content-Type": "application/json" };
 
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
     const baseSlug = title.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 72) || "resource";
     const { data: slugMatch } = await supabase.from("resources").select("id").eq("slug", baseSlug).maybeSingle();
     const slug = slugMatch ? `${baseSlug}-${crypto.randomUUID().slice(0, 6)}` : baseSlug;
+    const referralCode = await generateReferralCode(title);
     let pdfUrl: string | null = null;
     if (hasPdf) {
       if (!(file instanceof File) || file.type !== "application/pdf" || file.size > 10 * 1024 * 1024) {
@@ -45,14 +47,16 @@ export async function POST(request: Request) {
 
     const { data: inserted, error } = await supabase
       .from("resources")
-      .insert({ slug, title, description, type: "bundle", content: content || null, pdf_url: pdfUrl, article_url: url || null, file_url: null, is_published: true })
+      .insert({ slug, title, description, type: "bundle", content: content || null, pdf_url: pdfUrl, article_url: url || null, file_url: null, referral_code: referralCode, is_published: true })
       .select()
       .single();
     if (error) throw error;
 
-    return new Response(JSON.stringify({ resource: inserted }), { status: 201, headers: jsonHeaders });
-  } catch (error) {
-    console.error(error);
+    const shareUrl = new URL(`/res/${encodeURIComponent(slug)}`, request.url);
+    shareUrl.searchParams.set("ref", referralCode);
+    return new Response(JSON.stringify({ resource: inserted, shareUrl: shareUrl.toString() }), { status: 201, headers: jsonHeaders });
+  } catch {
+    console.error("Resource publication failed");
     return new Response(JSON.stringify({ error: "Unable to publish resource" }), { status: 500, headers: jsonHeaders });
   }
 }
@@ -68,4 +72,43 @@ export async function DELETE(request: Request) {
   if (error) return new Response(JSON.stringify({ error: "Unable to delete resource" }), { status: 500, headers: jsonHeaders });
 
   return new Response(JSON.stringify({ ok: true }), { status: 200, headers: jsonHeaders });
+}
+
+export async function PATCH(request: Request) {
+  const { supabase, isAdmin } = await requireAdmin();
+  if (!isAdmin || !supabase) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: jsonHeaders });
+
+  try {
+    const form = await request.formData();
+    const id = String(form.get("id") || "");
+    const title = String(form.get("title") || "").trim();
+    const description = String(form.get("description") || "").trim();
+    const content = String(form.get("content") || "").trim();
+    const url = String(form.get("url") || "").trim();
+    const file = form.get("file");
+    if (!id || !title || !description) return new Response(JSON.stringify({ error: "Invalid fields" }), { status: 400, headers: jsonHeaders });
+
+    const { data: existing, error: existingError } = await supabase.from("resources").select("pdf_url").eq("id", id).single();
+    if (existingError || !existing) return new Response(JSON.stringify({ error: "Resource not found" }), { status: 404, headers: jsonHeaders });
+
+    const hasNewPdf = file instanceof File && file.size > 0;
+    if (!content && !url && !hasNewPdf && !existing.pdf_url) return new Response(JSON.stringify({ error: "Add at least one resource item" }), { status: 400, headers: jsonHeaders });
+
+    let pdfUrl = existing.pdf_url as string | null;
+    if (hasNewPdf) {
+      if (!(file instanceof File) || file.type !== "application/pdf" || file.size > 10 * 1024 * 1024) return new Response(JSON.stringify({ error: "A PDF under 10 MB is required" }), { status: 400, headers: jsonHeaders });
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+      const path = `${crypto.randomUUID()}-${safeName}`;
+      const { error: uploadError } = await supabase.storage.from("resources").upload(path, file, { contentType: "application/pdf" });
+      if (uploadError) throw uploadError;
+      pdfUrl = supabase.storage.from("resources").getPublicUrl(path).data.publicUrl;
+    }
+
+    const { data: updated, error } = await supabase.from("resources").update({ title, description, content: content || null, article_url: url || null, pdf_url: pdfUrl }).eq("id", id).select().single();
+    if (error) throw error;
+    return new Response(JSON.stringify({ resource: updated }), { status: 200, headers: jsonHeaders });
+  } catch (error) {
+    console.error("Resource update failed", error);
+    return new Response(JSON.stringify({ error: "Unable to update resource" }), { status: 500, headers: jsonHeaders });
+  }
 }

@@ -1,4 +1,4 @@
-export const Icon = ({ name }: { name: "book" | "clock" | "arrow" | "arrow-right" | "copy" | "download" | "spark" | "close" | "upload" | "check" | "link" | "star" | "lock" }) => {
+export const Icon = ({ name }: { name: "book" | "clock" | "arrow" | "arrow-right" | "copy" | "download" | "spark" | "close" | "upload" | "check" | "link" | "star" | "lock" | "edit" }) => {
   const paths = {
     book: <><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></>,
     clock: <><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></>,
@@ -13,6 +13,7 @@ export const Icon = ({ name }: { name: "book" | "clock" | "arrow" | "arrow-right
     upload: <><path d="M12 16V4m0 0L8 8m4-4 4 4"/><path d="M4 18v2h16v-2"/></>,
     check: <path d="m5 12 4 4L19 6"/>,
     link: <><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></>,
+    edit: <><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></>,
   };
   return <svg viewBox="0 0 24 24" aria-hidden="true">{paths[name]}</svg>;
 };

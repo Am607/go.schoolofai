@@ -42,7 +42,7 @@ export default function LoginForm() {
     <div className="login-page">
       <div className="login-visual">
         <div className="login-visual-inner">
-          <Image className="brand-logo login-logo" src="/brand/logo_white.png" alt="School of AI" width={2750} height={974} />
+          <Image className="brand-logo login-logo" src="/brand/logo-transparent.png" alt="School of AI" width={2750} height={974} />
           <h1>Run the creator<br />resource library.</h1>
           <p>Sign in to publish prompts, PDFs, and articles that show up on the homepage.</p>
         </div>

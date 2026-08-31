@@ -20,7 +20,7 @@ export function HomeExperience({ courses, resources, selectedResource, referralC
     <main className="home-page">
       <div className="nav-wrap">
         <nav className="nav shell" aria-label="Main navigation">
-          <a className="brand" href="#courses" aria-label="SOAI home"><span className="header-logo"><Image className="brand-logo" src="/brand/logo_white.png" alt="School of AI" width={2750} height={974} priority /></span><span className="brand-tagline">Creator resources</span></a>
+          <a className="brand" href="#courses" aria-label="SOAI home"><span className="header-logo"><Image className="brand-logo" src="/brand/logo-transparent.png" alt="School of AI" width={2750} height={974} priority /></span><span className="brand-tagline">Creator resources</span></a>
         </nav>
       </div>
 
@@ -56,7 +56,7 @@ export function HomeExperience({ courses, resources, selectedResource, referralC
 
       {selectedResource && <ResourceSplit prompt={prompt} sideResources={sideResources} selectedResource={selectedResource} />}
 
-      {/* <footer className="footer shell"><div className="brand footer-brand"><Image className="brand-logo" src="/brand/logo_white.png" alt="School of AI" width={2750} height={974} /><span className="brand-tagline">Learn · Create · Grow</span></div><p>Practical AI education for the next generation of creators.</p><p>© {new Date().getFullYear()} SOAI</p></footer> */}
+      {/* <footer className="footer shell"><div className="brand footer-brand"><Image className="brand-logo" src="/brand/logo-transparent.png" alt="School of AI" width={2750} height={974} /><span className="brand-tagline">Learn · Create · Grow</span></div><p>Practical AI education for the next generation of creators.</p><p>© {new Date().getFullYear()} SOAI</p></footer> */}
     </main>
   );
 }
