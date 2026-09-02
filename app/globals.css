@@ -344,24 +344,6 @@ svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-linecap:ro
   .detail-prompt{padding:18px}
   .detail-prompt p{font-size:11px}
 }
-@media(min-width:901px){
-  .home-page .courses-section{min-height:0;padding:34px 0 40px;overflow:visible}
-  .home-page .courses-section>.shell{width:min(880px,calc(100% - 48px))}
-  .home-page .section-heading{display:block;max-width:720px;margin-bottom:20px}
-  .home-page .section-heading .section-kicker{margin-bottom:10px}
-  .home-page .section-heading h2{font-size:38px;line-height:1.05;letter-spacing:-1.8px;white-space:nowrap}
-  .home-page .section-heading>p{max-width:620px;margin:10px 0 0;padding:0;border:0;font-size:12px;line-height:1.5}
-  .home-page .course-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding-top:16px}
-  .home-page .course-card{border-radius:17px}
-  .home-page .course-art,.home-page .course-grid .course-card:first-child .course-art{height:190px;margin:6px 6px 0;border-radius:13px}
-  .home-page .course-body{padding:12px 14px 14px}
-  .home-page .course-body h3{font-size:18px;line-height:1.15;margin:2px 0 10px}
-  .home-page .course-description{display:none}
-  .home-page .course-meta{font-size:9px;gap:12px;padding-bottom:9px;flex-wrap:nowrap}
-  .home-page .course-footer{padding-top:9px}
-  .home-page .resources-section{padding:48px 0 60px}
-  .home-page .resources-top{margin-bottom:30px}
-}
 
 /* Block Editor & Sequential Cards Styling */
 .admin-blocks-container {
