@@ -1,20 +1,36 @@
 import Image from "next/image";
 import ResourceSplit from "./resource-list";
 import { Icon } from "./icons";
-import { getCourses } from "./data";
+import { getHomeCourses } from "./data";
 import type { Course, Resource } from "./data";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const courses = await getCourses();
+  const courses = await getHomeCourses();
   return <HomeExperience courses={courses} resources={[]} />;
 }
 
-export function HomeExperience({ courses, resources, selectedResource, referralCode }: { courses: Course[]; resources: Resource[]; selectedResource?: Resource; referralCode?: string }) {
+export function HomeExperience({ courses, resources, selectedResource, referralCode, allCourses }: { courses: Course[]; resources: Resource[]; selectedResource?: Resource; referralCode?: string; allCourses?: Course[] }) {
   const prompts = resources.filter(r => Boolean(r.content));
   const prompt = selectedResource?.content ? selectedResource : prompts[0] ?? null;
   const sideResources = resources.filter(r => !r.content).sort((a) => a.id === selectedResource?.id ? -1 : 0);
+
+  const displayedCourses = (() => {
+    const chosenIds = selectedResource?.course_ids ?? [];
+    if (chosenIds.length === 0) return courses;
+    // Match against the full catalog, not just the homepage-selected list,
+    // so a resource can pin a course to its own page even if that course
+    // isn't (or isn't yet) part of the site-wide homepage selection.
+    const catalog = allCourses && allCourses.length > 0 ? allCourses : courses;
+    const chosenCourses = chosenIds
+      .map(id => catalog.find(c => c.id === id || c.slug === id))
+      .filter((c): c is Course => Boolean(c));
+    if (chosenCourses.length === 0) return courses;
+    const chosenIdSet = new Set(chosenCourses.map(c => c.id));
+    const remaining = courses.filter(c => !chosenIdSet.has(c.id));
+    return [...chosenCourses, ...remaining];
+  })();
 
   return (
     <main className="home-page">
@@ -24,9 +40,9 @@ export function HomeExperience({ courses, resources, selectedResource, referralC
         </nav>
       </div>
 
-      <section className="courses-section" id="courses"><div className="shell">
+      {displayedCourses.length > 0 && <section className="courses-section" id="courses"><div className="shell">
         <div className="section-heading"><div><span className="section-kicker">DON&apos;T STOP AT THE PROMPT</span><h2>Turn one prompt into a <em>real AI skill.</em></h2></div><p>Copy the free resource, then learn the practical system behind better results with AI.</p></div>
-        <div className="course-grid">{courses.map((course, index) => {
+        <div className="course-grid">{displayedCourses.map((course, index) => {
           const courseUrl = `https://schoolofai.so/course/${encodeURIComponent(course.slug)}/landing${referralCode ? `?ref=${encodeURIComponent(referralCode)}` : ""}`;
           return <a className={`course-card card-${index + 1}`} href={course.isUpcoming ? undefined : courseUrl} aria-disabled={course.isUpcoming || undefined} key={course.id}>
           <div className="course-art">
@@ -52,7 +68,7 @@ export function HomeExperience({ courses, resources, selectedResource, referralC
           </div>
           </a>;
         })}</div>
-      </div></section>
+      </div></section>}
 
       {selectedResource && <ResourceSplit prompt={prompt} sideResources={sideResources} selectedResource={selectedResource} />}
 
