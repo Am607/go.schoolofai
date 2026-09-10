@@ -15,7 +15,7 @@ export default async function ResourceRoute({ params, searchParams }: { params: 
   const { slug } = await params;
   const { ref } = await searchParams;
   const referralCode = Array.isArray(ref) ? ref[0] : ref;
-  const [selectedResource, courses, resources] = await Promise.all([getResourceBySlug(slug), getCourses(), getResources()]);
+  const [selectedResource, resources, allCourses] = await Promise.all([getResourceBySlug(slug), getResources(), getCourses()]);
   if (!selectedResource) notFound();
-  return <HomeExperience courses={courses} resources={resources} selectedResource={selectedResource} referralCode={referralCode} />;
+  return <HomeExperience courses={allCourses} resources={resources} selectedResource={selectedResource} referralCode={referralCode} allCourses={allCourses} />;
 }
