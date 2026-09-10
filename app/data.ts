@@ -180,10 +180,11 @@ export async function getHomeCourseIds(): Promise<string[]> {
 // show, so the homepage doesn't load the full course catalog on every visit.
 export async function getHomeCourses(): Promise<Course[]> {
   const ids = await getHomeCourseIds();
-  if (ids.length === 0) return [];
   const all = await getCourses();
+  if (ids.length === 0) return all;
   const byId = new Map(all.map(c => [c.id, c] as const));
-  return ids.map(id => byId.get(id)).filter((c): c is Course => Boolean(c));
+  const selected = ids.map(id => byId.get(id)).filter((c): c is Course => Boolean(c));
+  return selected.length > 0 ? selected : all;
 }
 export async function getResources(): Promise<Resource[]> { const url = process.env.SUPABASE_URL; const key = process.env.SUPABASE_ANON_KEY; if (!url || !key) return []; try { const response = await fetch(`${url}/rest/v1/resources?select=*&is_published=eq.true&order=created_at.desc`, { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" }); if (!response.ok) throw new Error(); return await response.json() as Resource[]; } catch { return []; } }
 
