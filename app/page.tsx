@@ -1,13 +1,13 @@
 import Image from "next/image";
 import ResourceSplit from "./resource-list";
 import { Icon } from "./icons";
-import { getHomeCourses } from "./data";
+import { getCourses } from "./data";
 import type { Course, Resource } from "./data";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const courses = await getHomeCourses();
+  const courses = await getCourses();
   return <HomeExperience courses={courses} resources={[]} />;
 }
 
@@ -17,19 +17,15 @@ export function HomeExperience({ courses, resources, selectedResource, referralC
   const sideResources = resources.filter(r => !r.content).sort((a) => a.id === selectedResource?.id ? -1 : 0);
 
   const displayedCourses = (() => {
-    const chosenIds = selectedResource?.course_ids ?? [];
-    if (chosenIds.length === 0) return courses;
-    // Match against the full catalog, not just the homepage-selected list,
-    // so a resource can pin a course to its own page even if that course
-    // isn't (or isn't yet) part of the site-wide homepage selection.
+    if (!selectedResource) {
+      return courses;
+    }
+    const chosenIds = selectedResource.course_ids ?? [];
+    if (chosenIds.length === 0) return [];
     const catalog = allCourses && allCourses.length > 0 ? allCourses : courses;
-    const chosenCourses = chosenIds
+    return chosenIds
       .map(id => catalog.find(c => c.id === id || c.slug === id))
       .filter((c): c is Course => Boolean(c));
-    if (chosenCourses.length === 0) return courses;
-    const chosenIdSet = new Set(chosenCourses.map(c => c.id));
-    const remaining = courses.filter(c => !chosenIdSet.has(c.id));
-    return [...chosenCourses, ...remaining];
   })();
 
   return (
